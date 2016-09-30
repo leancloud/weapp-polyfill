@@ -1,4 +1,3 @@
-const global = require('./global.js');
 var localStorage = require('./localstorage.js');
 var XMLHttpRequest = require('./xmlhttprequest.js');
 

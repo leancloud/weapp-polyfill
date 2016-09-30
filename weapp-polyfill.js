@@ -1,6 +1,43 @@
-var exports = module.exports = {};
+var exports = module.exports = {};(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.weappPolyfill = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var localStorage = require('./localstorage.js');
+var XMLHttpRequest = require('./xmlhttprequest.js');
 
-(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.eventTargetShim = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+module.exports = {
+    polyfill(target = this) {
+        if (typeof target !== 'object') {
+            throw new Error('polyfill target is not an Object');
+        }
+        Object.assign(target, {
+            localStorage,
+            XMLHttpRequest,
+        });
+        // window.localStorage is readonly
+        if (target.localStorage !== localStorage) {
+            target.wxStorage = localStorage;
+        }
+    }
+}
+},{"./localstorage.js":2,"./xmlhttprequest.js":7}],2:[function(require,module,exports){
+class Storage {
+    getItem(key) {
+        return wx.getStorageSync(key);
+    }
+
+    setItem(key, value) {
+        return wx.setStorageSync(key, value);
+    }
+
+    removeItem(key) {
+        return this.setItem(key, '');
+    }
+
+    clear() {
+        return wx.clearStorageSync();
+    }
+}
+
+module.exports = new Storage();
+},{}],3:[function(require,module,exports){
 /**
  * @author Toru Nagashima
  * @copyright 2015 Toru Nagashima. All rights reserved.
@@ -73,7 +110,7 @@ exports.newNode = function newNode(listener, kind) {
     return {listener: listener, kind: kind, next: null};
 };
 
-},{}],2:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 /**
  * @author Toru Nagashima
  * @copyright 2015 Toru Nagashima. All rights reserved.
@@ -194,7 +231,7 @@ exports.defineCustomEventTarget = function(EventTargetBase, types) {
     return EventTarget;
 };
 
-},{"./commons":1}],3:[function(require,module,exports){
+},{"./commons":3}],5:[function(require,module,exports){
 /**
  * @author Toru Nagashima
  * @copyright 2015 Toru Nagashima. All rights reserved.
@@ -386,7 +423,7 @@ EventTarget.prototype = Object.create(
     }
 );
 
-},{"./commons":1,"./custom-event-target":2,"./event-wrapper":4}],4:[function(require,module,exports){
+},{"./commons":3,"./custom-event-target":4,"./event-wrapper":6}],6:[function(require,module,exports){
 /**
  * @author Toru Nagashima
  * @copyright 2015 Toru Nagashima. All rights reserved.
@@ -529,5 +566,99 @@ exports.createEventWrapper = function createEventWrapper(event, eventTarget) {
     );
 };
 
-},{"./commons":1}]},{},[3])(3)
+},{"./commons":3}],7:[function(require,module,exports){
+const EventTarget = require('event-target-shim');
+
+const UNSENT = 0;
+const OPENED = 1;
+const HEADERS_RECEIVED = 2;
+const LOADING = 3;
+const DONE = 4;
+
+const REQUEST_EVENTS = [
+  'abort',
+  'error',
+  'load',
+  'loadstart',
+  'progress',
+  'timeout',
+  'loadend',
+  'readystatechange'
+];
+
+class XMLHttpRequestEventTarget extends EventTarget {}
+
+class XMLHttpRequest extends XMLHttpRequestEventTarget {
+
+    constructor() {
+        super(REQUEST_EVENTS);
+        this.readyState = UNSET;
+        this._headers = {};
+    }
+
+    abort() {
+        throw new Error('not supported in weixin');
+    }
+    getAllResponseHeaders() {
+        throw new Error('not supported in weixin');
+    }
+    getResponseHeader() {
+        throw new Error('not supported in weixin');
+    }
+    overrideMimeType() {
+        throw new Error('not supported in weixin');
+    }
+    open(method, url, async = true) {
+        if (this.readyState !== UNSENT) {
+            throw new Error('request is already opened');
+        }
+        if (!async) {
+            throw new Error('sync request is not supported');
+        }
+        this._method = method;
+        this._url = url;
+        this.readyState = OPENED;
+        this.dispatchEvent({type: 'readystatechange'});
+    }
+    setRequestHeader(header, value) {
+        if (this.readyState !== OPENED) {
+            throw new Error('request is not opened');
+        }
+        this._headers[header.toLowerCase()] = value;
+    }
+    send(data) {
+        if (this.readyState !== OPENED) {
+            throw new Error('request is not opened');
+        }
+        wx.request({
+            url: this._url,
+            data: data,
+            header: this._headers,
+            success: (response) => {
+                this.status = response.statusCode;
+                let text = response.data;
+                if (typeof text !== string) {
+                    text = JSON.stringify(text);
+                }
+                this.responseText = this.response = text;
+                this.readyState = DONE;
+                this.dispatchEvent({type: 'readystatechange'});
+            },
+            fail: (error) => {
+                this.dispatchEvent({type: 'error'});
+            }
+        })
+    }
+}
+
+Object.assign(XMLHttpRequest, {
+    UNSENT,
+    OPENED,
+    HEADERS_RECEIVED,
+    LOADING,
+    DONE,
+});
+
+module.exports = XMLHttpRequest;
+},{"event-target-shim":5}]},{},[1])(1)
 });

@@ -4,11 +4,19 @@
   "description": "Browser API polyfill for Weapp",
   "main": "index.js",
   "scripts": {
+    "build": "browserify index.js -s weapp-polyfill > weapp-polyfill.js && prepend weapp-polyfill.js 'var exports = module.exports = {};'"
   },
   "keywords": [
     "weapp",
     "polyfill"
   ],
   "author": "LeanCloud",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "event-target-shim": "^1.1.1"
+  },
+  "devDependencies": {
+    "browserify": "^13.1.0",
+    "prepend-file-cli": "^1.0.4"
+  }
 }

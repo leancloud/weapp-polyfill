@@ -1,4 +1,4 @@
-const EventTarget = require('./event-target.js');
+const EventTarget = require('event-target-shim');
 
 const UNSENT = 0;
 const OPENED = 1;
