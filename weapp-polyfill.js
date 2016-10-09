@@ -1,6 +1,7 @@
 var exports = module.exports = {};(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.weappPolyfill = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 var localStorage = require('./localstorage.js');
 var XMLHttpRequest = require('./xmlhttprequest.js');
+var WebSocket = require('./websocket.js');
 
 module.exports = {
     polyfill(target = this) {
@@ -10,6 +11,8 @@ module.exports = {
         Object.assign(target, {
             localStorage,
             XMLHttpRequest,
+            WebSocket,
+            Object,
         });
         // window.localStorage is readonly
         if (target.localStorage !== localStorage) {
@@ -17,7 +20,8 @@ module.exports = {
         }
     }
 }
-},{"./localstorage.js":2,"./xmlhttprequest.js":7}],2:[function(require,module,exports){
+
+},{"./localstorage.js":2,"./websocket.js":7,"./xmlhttprequest.js":8}],2:[function(require,module,exports){
 class Storage {
     getItem(key) {
         return wx.getStorageSync(key);
@@ -569,6 +573,146 @@ exports.createEventWrapper = function createEventWrapper(event, eventTarget) {
 },{"./commons":3}],7:[function(require,module,exports){
 const EventTarget = require('event-target-shim');
 
+const CONNECTING = 0;
+const OPEN = 1;
+const CLOSING = 2;
+const CLOSED = 3;
+
+const EVENTS = [
+    'open',
+    'error',
+    'message',
+    'close',
+];
+
+let instance;
+
+wx.onSocketOpen(function (event) {
+    if (instance) {
+        instance._readyState = OPEN;
+        instance.dispatchEvent({
+            type: 'open'
+        });
+    }
+});
+wx.onSocketError(function (event) {
+    if (instance) {
+        instance._readyState = CLOSED;
+        instance.dispatchEvent(event);
+    }
+});
+wx.onSocketMessage(function (event) {
+    if (instance) {
+        var {
+            data,
+            origin,
+            ports,
+            source,
+        } = event;
+        instance.dispatchEvent({
+            data,
+            origin,
+            ports,
+            source,
+            type: 'message',
+        });
+    }
+});
+wx.onSocketClose(function (event) {
+    if (instance) {
+        instance._readyState = CLOSED;
+        var {
+            code,
+            reason,
+            wasClean,
+        } = event;
+        instance.dispatchEvent({
+            code,
+            reason,
+            wasClean,
+            type: 'close',
+        });
+        instance = null;
+    }
+});
+
+class WebSocket extends EventTarget {
+    constructor(url, protocal) {
+        if (!url) {
+            throw new TypeError('Failed to construct \'WebSocket\': url required');
+        }
+        if (protocal) {
+            throw new Error('subprotocal not supported in weapp');
+        }
+        super(EVENTS);
+        this._url = url;
+        this._protocal = ''; // default value according to specs
+        this._readyState = CONNECTING;
+        if (instance) {
+            // instance._removeEventListeners();
+            instance.dispatchEvent({
+                type: 'close'
+            });
+        }
+        instance = this;
+        wx.connectSocket({
+            url
+        });
+        // this._addEventListeners();
+    }
+
+    get url() {
+        return this._url;
+    }
+    get protocal() {
+        return this._protocal;
+    }
+    get readyState() {
+        return this._readyState;
+    }
+
+    close() {
+        if (this.readyState === CONNECTING) {
+            console.warn('close WebSocket which is connecting might not work');
+        }
+        // this._removeEventListeners();
+        wx.closeSocket();
+    }
+
+    send(data) {
+        if (this.readyState !== OPEN) {
+            throw new Error('INVALID_STATE_ERR');
+        }
+
+        if (typeof data !== 'string') {
+            throw new TypeError('only string typed data are supported');
+        }
+
+        wx.sendSocketMessage({
+            data
+        });
+    }
+
+    // _addEventListeners() {
+    // }
+
+    // _removeEventListeners() {
+    //   // no wx API for this
+    // }
+}
+
+Object.assign(WebSocket, {
+    CONNECTING,
+    OPEN,
+    CLOSING,
+    CLOSED,
+});
+
+module.exports = WebSocket;
+
+},{"event-target-shim":5}],8:[function(require,module,exports){
+const EventTarget = require('event-target-shim');
+
 const UNSENT = 0;
 const OPENED = 1;
 const HEADERS_RECEIVED = 2;
@@ -597,16 +741,16 @@ class XMLHttpRequest extends XMLHttpRequestEventTarget {
     }
 
     abort() {
-        throw new Error('not supported in weixin');
+        throw new Error('not supported in weapp');
     }
     getAllResponseHeaders() {
-        throw new Error('not supported in weixin');
+        throw new Error('not supported in weapp');
     }
     getResponseHeader() {
-        throw new Error('not supported in weixin');
+        throw new Error('not supported in weapp');
     }
     overrideMimeType() {
-        throw new Error('not supported in weixin');
+        throw new Error('not supported in weapp');
     }
     open(method, url, async = true) {
         if (this.readyState !== UNSENT) {
@@ -660,5 +804,6 @@ Object.assign(XMLHttpRequest, {
 });
 
 module.exports = XMLHttpRequest;
+
 },{"event-target-shim":5}]},{},[1])(1)
 });

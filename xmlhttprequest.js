@@ -28,16 +28,16 @@ class XMLHttpRequest extends XMLHttpRequestEventTarget {
     }
 
     abort() {
-        throw new Error('not supported in weixin');
+        throw new Error('not supported in weapp');
     }
     getAllResponseHeaders() {
-        throw new Error('not supported in weixin');
+        throw new Error('not supported in weapp');
     }
     getResponseHeader() {
-        throw new Error('not supported in weixin');
+        throw new Error('not supported in weapp');
     }
     overrideMimeType() {
-        throw new Error('not supported in weixin');
+        throw new Error('not supported in weapp');
     }
     open(method, url, async = true) {
         if (this.readyState !== UNSENT) {
