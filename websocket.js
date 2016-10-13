@@ -63,7 +63,7 @@ wx.onSocketClose(function (event) {
     }
 });
 
-class WebSocket extends EventTarget {
+class WebSocket extends EventTarget(EVENTS) {
     constructor(url, protocal) {
         if (!url) {
             throw new TypeError('Failed to construct \'WebSocket\': url required');
@@ -71,7 +71,7 @@ class WebSocket extends EventTarget {
         if (protocal) {
             throw new Error('subprotocal not supported in weapp');
         }
-        super(EVENTS);
+        super();
         this._url = url;
         this._protocal = ''; // default value according to specs
         this._readyState = CONNECTING;

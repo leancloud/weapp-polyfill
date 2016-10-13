@@ -17,13 +17,11 @@ const REQUEST_EVENTS = [
   'readystatechange'
 ];
 
-class XMLHttpRequestEventTarget extends EventTarget {}
-
-class XMLHttpRequest extends XMLHttpRequestEventTarget {
+class XMLHttpRequest extends EventTarget(REQUEST_EVENTS) {
 
     constructor() {
-        super(REQUEST_EVENTS);
-        this.readyState = UNSET;
+        super();
+        this.readyState = UNSENT;
         this._headers = {};
     }
 
@@ -31,10 +29,16 @@ class XMLHttpRequest extends XMLHttpRequestEventTarget {
         throw new Error('not supported in weapp');
     }
     getAllResponseHeaders() {
-        throw new Error('not supported in weapp');
+        console.warn('getAllResponseHeaders always returns \'\'');
+        return '';
     }
-    getResponseHeader() {
-        throw new Error('not supported in weapp');
+    getResponseHeader(key) {
+        if (key === 'content-type') {
+            console.warn('get content-type always returns \'application/json\'');
+            return 'application/json';
+        }
+        console.warn('getResponseHeader always returns \'\'');
+        return '';
     }
     overrideMimeType() {
         throw new Error('not supported in weapp');
@@ -63,12 +67,14 @@ class XMLHttpRequest extends XMLHttpRequestEventTarget {
         }
         wx.request({
             url: this._url,
-            data: data,
+            data: data || '',
+            method: this._method,
             header: this._headers,
             success: (response) => {
                 this.status = response.statusCode;
+                this.statusText = response.statusCode;
                 let text = response.data;
-                if (typeof text !== string) {
+                if (typeof text !== 'string') {
                     text = JSON.stringify(text);
                 }
                 this.responseText = this.response = text;
@@ -78,7 +84,7 @@ class XMLHttpRequest extends XMLHttpRequestEventTarget {
             fail: (error) => {
                 this.dispatchEvent({type: 'error'});
             }
-        })
+        });
     }
 }
 

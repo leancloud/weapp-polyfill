@@ -3,7 +3,7 @@ var XMLHttpRequest = require('./xmlhttprequest.js');
 var WebSocket = require('./websocket.js');
 
 module.exports = {
-    polyfill(target = window || this) {
+    polyfill(target = global || window) {
         if (typeof target !== 'object') {
             throw new Error('polyfill target is not an Object');
         }
@@ -17,5 +17,8 @@ module.exports = {
         if (target.localStorage !== localStorage) {
             target.wxStorage = localStorage;
         }
-    }
+    },
+    localStorage,
+    XMLHttpRequest,
+    WebSocket,
 }
