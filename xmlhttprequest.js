@@ -1,4 +1,5 @@
 const EventTarget = require('event-target-shim');
+const FormData = require('./formdata.js');
 
 const UNSENT = 0;
 const OPENED = 1;
@@ -16,6 +17,18 @@ const REQUEST_EVENTS = [
   'loadend',
   'readystatechange'
 ];
+
+function successCallback(response) {
+    this.status = response.statusCode;
+    this.statusText = response.statusCode;
+    let text = response.data;
+    if (typeof text !== 'string') {
+        text = JSON.stringify(text);
+    }
+    this.responseText = this.response = text;
+    this.readyState = DONE;
+    this.dispatchEvent({type: 'readystatechange'});
+}
 
 class XMLHttpRequest extends EventTarget(REQUEST_EVENTS) {
 
@@ -65,26 +78,41 @@ class XMLHttpRequest extends EventTarget(REQUEST_EVENTS) {
         if (this.readyState !== OPENED) {
             throw new Error('request is not opened');
         }
-        wx.request({
-            url: this._url,
-            data: data || '',
-            method: this._method,
-            header: this._headers,
-            success: (response) => {
-                this.status = response.statusCode;
-                this.statusText = response.statusCode;
-                let text = response.data;
-                if (typeof text !== 'string') {
-                    text = JSON.stringify(text);
-                }
-                this.responseText = this.response = text;
-                this.readyState = DONE;
-                this.dispatchEvent({type: 'readystatechange'});
-            },
-            fail: (error) => {
-                this.dispatchEvent({type: 'error'});
+        if (data instanceof FormData) {
+            const entries = data.entries();
+            const blobs = entries.filter(entry => typeof entry[1] !== 'string');
+            if (blobs.length === 0) {
+                throw new Error('Must specify a Blob field in FormData');
             }
-        });
+            if (blobs.length > 1) {
+                console.warn('Only the first Blob will be send in Weapp');
+            }
+            const restData = entries
+                .filter(entry => typeof entry[1] === 'string')
+                .reduce((result, entry) => Object.assign(result, { [entry[0]]: entry[1] }), {});
+            wx.uploadFile({
+                url: this._url,
+                name: blobs[0][0],
+                filePath: blobs[0][1].uri,
+                formData: restData,
+                header: this._headers,
+                success: successCallback.bind(this),
+                fail: (error) => {
+                    this.dispatchEvent({type: 'error'});
+                }
+            })
+        } else {
+            wx.request({
+                url: this._url,
+                data: data || '',
+                method: this._method,
+                header: this._headers,
+                success: successCallback.bind(this),
+                fail: (error) => {
+                    this.dispatchEvent({type: 'error'});
+                }
+            });
+        }
     }
 }
 

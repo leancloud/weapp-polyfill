@@ -1,5 +1,6 @@
 var localStorage = require('./localstorage.js');
 var XMLHttpRequest = require('./xmlhttprequest.js');
+var FormData = require('./formdata.js');
 var WebSocket = require('./websocket.js');
 
 module.exports = {
@@ -10,6 +11,7 @@ module.exports = {
         Object.assign(target, {
             localStorage,
             XMLHttpRequest,
+            FormData,
             WebSocket,
             Object,
         });
@@ -20,5 +22,6 @@ module.exports = {
     },
     localStorage,
     XMLHttpRequest,
+    FormData,
     WebSocket,
 }
