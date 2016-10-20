@@ -1,19 +1,19 @@
 class Storage {
-    getItem(key) {
-        return wx.getStorageSync(key);
-    }
+  getItem(key) {
+    return wx.getStorageSync(key);
+  }
 
-    setItem(key, value) {
-        return wx.setStorageSync(key, value);
-    }
+  setItem(key, value) {
+    return wx.setStorageSync(key, value);
+  }
 
-    removeItem(key) {
-        return this.setItem(key, '');
-    }
+  removeItem(key) {
+    return this.setItem(key, '');
+  }
 
-    clear() {
-        return wx.clearStorageSync();
-    }
+  clear() {
+    return wx.clearStorageSync();
+  }
 }
 
 module.exports = new Storage();
