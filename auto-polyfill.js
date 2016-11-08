@@ -2,7 +2,15 @@ var polyfill = require('./index.js').polyfill;
 window = window || {};
 polyfill();
 polyfill(window);
-localStorage = localStorage || require('./localstorage.js');
-XMLHttpRequest = XMLHttpRequest || require('./xmlhttprequest.js');
-FormData = FormData || require('./formdata.js');
-WebSocket = WebSocket || require('./websocket.js');
+try {
+  localStorage = localStorage || require('./localstorage.js');
+} catch (e) {}
+try {
+  XMLHttpRequest = XMLHttpRequest || require('./xmlhttprequest.js');
+} catch (e) {}
+try {
+  FormData = FormData || require('./formdata.js');
+} catch (e) {}
+try {
+  WebSocket = WebSocket || require('./websocket.js');
+} catch (e) {}
