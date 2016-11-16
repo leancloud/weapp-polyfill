@@ -1,3 +1,4 @@
+const assign = require('object-assign');
 const EventTarget = require('event-target-shim');
 const FormData = require('./formdata.js');
 
@@ -89,7 +90,7 @@ class XMLHttpRequest extends EventTarget(REQUEST_EVENTS) {
       }
       const restData = entries
         .filter(entry => typeof entry[1] === 'string')
-        .reduce((result, entry) => Object.assign(result, { [entry[0]]: entry[1] }), {});
+        .reduce((result, entry) => assign(result, { [entry[0]]: entry[1] }), {});
       wx.uploadFile({
         url: this._url,
         name: blobs[0][0],
@@ -116,7 +117,7 @@ class XMLHttpRequest extends EventTarget(REQUEST_EVENTS) {
   }
 }
 
-Object.assign(XMLHttpRequest, {
+assign(XMLHttpRequest, {
   UNSENT,
   OPENED,
   HEADERS_RECEIVED,

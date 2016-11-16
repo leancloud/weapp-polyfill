@@ -1,3 +1,4 @@
+const assign = require('object-assign');
 const EventTarget = require('event-target-shim');
 
 const CONNECTING = 0;
@@ -128,7 +129,7 @@ class WebSocket extends EventTarget(EVENTS) {
   // }
 }
 
-Object.assign(WebSocket, {
+assign(WebSocket, {
   CONNECTING,
   OPEN,
   CLOSING,

@@ -1,3 +1,4 @@
+var assign = require('object-assign');
 var localStorage = require('./localstorage.js');
 var XMLHttpRequest = require('./xmlhttprequest.js');
 var FormData = require('./formdata.js');
@@ -8,7 +9,7 @@ module.exports = {
     if (typeof target !== 'object') {
       throw new Error('polyfill target is not an Object');
     }
-    Object.assign(target, {
+    assign(target, {
       localStorage,
       XMLHttpRequest,
       FormData,
