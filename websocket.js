@@ -15,6 +15,16 @@ const EVENTS = [
 
 let instance;
 
+function errorHandler(event) {
+  if (instance) {
+    instance._readyState = CLOSED;
+    instance.dispatchEvent({
+      type: 'error',
+      message: event.errMsg,
+    });
+  }
+}
+
 wx.onSocketOpen(function (event) {
   if (instance) {
     instance._readyState = OPEN;
@@ -23,12 +33,7 @@ wx.onSocketOpen(function (event) {
     });
   }
 });
-wx.onSocketError(function (event) {
-  if (instance) {
-    instance._readyState = CLOSED;
-    instance.dispatchEvent(event);
-  }
-});
+wx.onSocketError(errorHandler);
 wx.onSocketMessage(function (event) {
   if (instance) {
     var {
@@ -77,16 +82,15 @@ class WebSocket extends EventTarget(EVENTS) {
     this._protocal = ''; // default value according to specs
     this._readyState = CONNECTING;
     if (instance) {
-      // instance._removeEventListeners();
       instance.dispatchEvent({
         type: 'close'
       });
     }
     instance = this;
     wx.connectSocket({
-      url
+      url,
+      fail: (error) => setTimeout(() => errorHandler(error), 0),
     });
-    // this._addEventListeners();
   }
 
   get url() {
@@ -103,7 +107,6 @@ class WebSocket extends EventTarget(EVENTS) {
     if (this.readyState === CONNECTING) {
       console.warn('close WebSocket which is connecting might not work');
     }
-    // this._removeEventListeners();
     wx.closeSocket();
   }
 
@@ -121,12 +124,6 @@ class WebSocket extends EventTarget(EVENTS) {
     });
   }
 
-  // _addEventListeners() {
-  // }
-
-  // _removeEventListeners() {
-  //   // no wx API for this
-  // }
 }
 
 assign(WebSocket, {
