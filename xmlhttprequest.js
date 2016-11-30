@@ -106,7 +106,8 @@ class XMLHttpRequest extends EventTarget(REQUEST_EVENTS) {
       wx.request({
         url: this._url,
         data: data || '',
-        method: this._method,
+        // method 的 value 居然必须为大写
+        method: this._method.toUpperCase(),
         header: this._headers,
         success: successCallback.bind(this),
         fail: (error) => {
