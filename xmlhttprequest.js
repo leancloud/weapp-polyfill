@@ -99,6 +99,9 @@ class XMLHttpRequest extends EventTarget(REQUEST_EVENTS) {
         header: this._headers,
         success: successCallback.bind(this),
         fail: (error) => {
+          this.status = 0;
+          this.readyState = DONE;
+          this.dispatchEvent({ type: 'readystatechange' });
           this.dispatchEvent({ type: 'error' });
         }
       })
@@ -111,6 +114,9 @@ class XMLHttpRequest extends EventTarget(REQUEST_EVENTS) {
         header: this._headers,
         success: successCallback.bind(this),
         fail: (error) => {
+          this.status = 0;
+          this.readyState = DONE;
+          this.dispatchEvent({ type: 'readystatechange' });
           this.dispatchEvent({ type: 'error' });
         }
       });
