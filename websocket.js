@@ -28,50 +28,6 @@ function errorHandler(event) {
   }
 }
 
-wx.onSocketOpen(function (event) {
-  if (instance) {
-    instance._readyState = OPEN;
-    instance.dispatchEvent({
-      type: 'open'
-    });
-  }
-});
-wx.onSocketError(errorHandler);
-wx.onSocketMessage(function (event) {
-  if (instance) {
-    var {
-      data,
-      origin,
-      ports,
-      source,
-    } = event;
-    instance.dispatchEvent({
-      data,
-      origin,
-      ports,
-      source,
-      type: 'message',
-    });
-  }
-});
-wx.onSocketClose(function (event) {
-  if (instance) {
-    instance._readyState = CLOSED;
-    var {
-      code,
-      reason,
-      wasClean,
-    } = event;
-    instance.dispatchEvent({
-      code,
-      reason,
-      wasClean,
-      type: 'close',
-    });
-    instance = null;
-  }
-});
-
 class WebSocket extends EventTarget(EVENTS) {
   constructor(url, protocal) {
     if (!url) {
@@ -90,6 +46,51 @@ class WebSocket extends EventTarget(EVENTS) {
       });
     }
     instance = this;
+    
+    wx.onSocketOpen(function (event) {
+      if (instance) {
+        instance._readyState = OPEN;
+        instance.dispatchEvent({
+          type: 'open'
+        });
+      }
+    });
+    wx.onSocketError(errorHandler);
+    wx.onSocketMessage(function (event) {
+      if (instance) {
+        var {
+          data,
+          origin,
+          ports,
+          source,
+        } = event;
+        instance.dispatchEvent({
+          data,
+          origin,
+          ports,
+          source,
+          type: 'message',
+        });
+      }
+    });
+    wx.onSocketClose(function (event) {
+      if (instance) {
+        instance._readyState = CLOSED;
+        var {
+          code,
+          reason,
+          wasClean,
+        } = event;
+        instance.dispatchEvent({
+          code,
+          reason,
+          wasClean,
+          type: 'close',
+        });
+        instance = null;
+      }
+    });
+    
     wx.connectSocket({
       url,
       fail: (error) => setTimeout(() => errorHandler(error), 0),
