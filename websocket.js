@@ -16,6 +16,9 @@ const EVENTS = [
 let instance;
 
 function errorHandler(event) {
+  // 安卓小程序会诡异地触发 onSocketError 回调
+  // 通过比较 message 过滤掉
+  if (event.message === "") return;
   if (instance) {
     instance._readyState = CLOSED;
     instance.dispatchEvent({
