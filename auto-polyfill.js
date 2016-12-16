@@ -14,3 +14,6 @@ try {
 try {
   WebSocket = WebSocket || require('./websocket.js');
 } catch (e) {}
+try {
+  navigator = navigator || require('./navigator.js');
+} catch (e) {}

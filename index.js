@@ -3,6 +3,7 @@ var localStorage = require('./localstorage.js');
 var XMLHttpRequest = require('./xmlhttprequest.js');
 var FormData = require('./formdata.js');
 var WebSocket = require('./websocket.js');
+var navigator = require('./navigator');
 
 module.exports = {
   polyfill(target = global || window) {
@@ -15,6 +16,7 @@ module.exports = {
       FormData,
       WebSocket,
       Object,
+      navigator,
     });
     // window.localStorage is readonly
     if (target.localStorage !== localStorage) {
