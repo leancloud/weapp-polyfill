@@ -1,4 +1,3 @@
-var assign = require('object-assign');
 var localStorage = require('./localstorage.js');
 var XMLHttpRequest = require('./xmlhttprequest.js');
 var FormData = require('./formdata.js');
@@ -10,17 +9,16 @@ module.exports = {
     if (typeof target !== 'object') {
       throw new Error('polyfill target is not an Object');
     }
-    assign(target, {
+    const polyfills = {
       localStorage,
       XMLHttpRequest,
       FormData,
       WebSocket,
       Object,
       navigator,
-    });
-    // window.localStorage is readonly
-    if (target.localStorage !== localStorage) {
-      target.wxStorage = localStorage;
+    };
+    for (let k in polyfills) {
+      if (!target[k]) target[k] = polyfills[k];
     }
   },
   localStorage,
