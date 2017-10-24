@@ -22,6 +22,8 @@ const REQUEST_EVENTS = [
 function successCallback(response) {
   this.status = response.statusCode;
   this.statusText = response.statusCode;
+  // 基础库 1.2.0 开始支持
+  this._responseHeaders = response.header;
   let text = response.data;
   if (typeof text !== 'string') {
     text = JSON.stringify(text);
@@ -49,16 +51,13 @@ class XMLHttpRequest extends EventTarget(REQUEST_EVENTS) {
     throw new Error('该版本基础库不支持 abort request');    
   }
   getAllResponseHeaders() {
-    console.warn('getAllResponseHeaders always returns \'\'');
-    return '';
+    return this._responseHeaders ? Object.keys(this._responseHeaders).map(key => `${key}: ${this._responseHeaders[key]}`).join('\r\n') : '';
   }
   getResponseHeader(key) {
-    if (key === 'content-type') {
-      console.warn('get content-type always returns \'application/json\'');
-      return 'application/json';
+    if (this._responseHeaders && this._responseHeaders[key]) {
+      return this._responseHeaders[key];
     }
-    console.warn('getResponseHeader always returns \'\'');
-    return '';
+    return null;
   }
   overrideMimeType() {
     throw new Error('not supported in weapp');
