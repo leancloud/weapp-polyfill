@@ -19,6 +19,17 @@ const REQUEST_EVENTS = [
   'readystatechange'
 ];
 
+const REQUEST_UPLOAD_EVENTS = [
+  'abort',
+  'error',
+  'load',
+  'loadstart',
+  'progress',
+  'timeout',
+  'loadend'
+];
+
+
 function successCallback(response) {
   this.status = response.statusCode;
   this.statusText = response.statusCode;
@@ -33,12 +44,15 @@ function successCallback(response) {
   this.dispatchEvent({ type: 'readystatechange' });
 }
 
+class XMLHttpRequestUpload extends EventTarget(REQUEST_UPLOAD_EVENTS) {}
+
 class XMLHttpRequest extends EventTarget(REQUEST_EVENTS) {
 
   constructor() {
     super();
     this.readyState = UNSENT;
     this._headers = {};
+    this.upload = new XMLHttpRequestUpload();
   }
 
   abort() {
@@ -109,7 +123,20 @@ class XMLHttpRequest extends EventTarget(REQUEST_EVENTS) {
           this.dispatchEvent({ type: 'readystatechange' });
           this.dispatchEvent({ type: 'error' });
         }
-      })
+      });
+      // 基础库 1.4.0 开始支持
+      if (this._request && this._request.onProgressUpdate) {
+        this._request.onProgressUpdate(({
+          totalBytesSent,
+          totalBytesExpectedToSend,
+        }) => {
+          this.upload.dispatchEvent({
+            type: 'progress',
+            loaded: totalBytesSent,
+            total: totalBytesExpectedToSend,
+          });
+        });
+      }
     } else {
       this._request = wx.request({
         url: this._url,
