@@ -40,7 +40,13 @@ class XMLHttpRequest extends EventTarget(REQUEST_EVENTS) {
   }
 
   abort() {
-    throw new Error('not supported in weapp');
+    // 基础库 1.4.0 开始支持
+    if (!(this._request) || this._request.abort) {
+      this.status = 0;
+      this.readyState = DONE;
+      return this._request.abort();
+    }
+    throw new Error('该版本基础库不支持 abort request');    
   }
   getAllResponseHeaders() {
     console.warn('getAllResponseHeaders always returns \'\'');
@@ -91,7 +97,7 @@ class XMLHttpRequest extends EventTarget(REQUEST_EVENTS) {
       const restData = entries
         .filter(entry => typeof entry[1] === 'string')
         .reduce((result, entry) => assign(result, { [entry[0]]: entry[1] }), {});
-      wx.uploadFile({
+      this._request = wx.uploadFile({
         url: this._url,
         name: blobs[0][0],
         filePath: blobs[0][1].uri,
@@ -106,7 +112,7 @@ class XMLHttpRequest extends EventTarget(REQUEST_EVENTS) {
         }
       })
     } else {
-      wx.request({
+      this._request = wx.request({
         url: this._url,
         data: data || '',
         // method 的 value 居然必须为大写
