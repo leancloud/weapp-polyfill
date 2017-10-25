@@ -40,9 +40,6 @@ const {
 由于微信 API 的限制，polyfill 的 API 有以下限制：
 
 ### XMLHttpRequest
-- Response Headers 无法获得，`getResponseHeade('content-type')` 始终返回 `'application/json'`，其他 key 始终返回 `''`
-- 不支持上传进度
-- 不支持 abort
 - 不会出现`HEADERS_RECEIVED` 与 `LOADING` 状态
 
 ### FormData
@@ -52,3 +49,11 @@ const {
 ### WebSocket
 - 不支持 subprotocal
 - 不支持二进制帧
+
+## Changelogs
+
+### 2.0.0
+- XMLHttpRequest 增加了以下特性
+  - 支持获取 Response Headers
+  - 支持通过 xhr.upload 获取文件上传进度
+  - 支持 abort
