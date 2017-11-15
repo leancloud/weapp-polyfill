@@ -34,7 +34,12 @@ function successCallback(response) {
   this.status = response.statusCode;
   this.statusText = response.statusCode;
   // 基础库 1.2.0 开始支持
-  this._responseHeaders = response.header;
+  if (response.header) {
+    this._responseHeaders = Object.keys(response.header).reduce((headers, key) => {
+      headers[key.toLowerCase()] = response.header[key];
+      return headers;
+    }, {});
+  }
   let text = response.data;
   if (typeof text !== 'string') {
     text = JSON.stringify(text);
@@ -68,8 +73,9 @@ class XMLHttpRequest extends EventTarget(REQUEST_EVENTS) {
     return this._responseHeaders ? Object.keys(this._responseHeaders).map(key => `${key}: ${this._responseHeaders[key]}`).join('\r\n') : '';
   }
   getResponseHeader(key) {
-    if (this._responseHeaders && this._responseHeaders[key]) {
-      return this._responseHeaders[key];
+    const lowserCasedKey = key.toLowerCase();
+    if (this._responseHeaders && this._responseHeaders[lowserCasedKey]) {
+      return this._responseHeaders[lowserCasedKey];
     }
     return null;
   }
