@@ -52,6 +52,10 @@ const {
 
 ## Changelogs
 
+
+#### 2.0.1
+- XMLHttpRequest 忽略 response headers key 的大小写。
+
 ### 2.0.0
 - XMLHttpRequest 增加了以下特性
   - 支持获取 Response Headers
