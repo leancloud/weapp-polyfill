@@ -33,12 +33,12 @@ class WebSocket extends EventTarget(EVENTS) {
     if (!url) {
       throw new TypeError('Failed to construct \'WebSocket\': url required');
     }
-    if (protocal) {
+    if (protocal && !(wx.canIUse && wx.canIUse('connectSocket.object.protocols'))) {
       throw new Error('subprotocal not supported in weapp');
     }
     super();
     this._url = url;
-    this._protocal = ''; // default value according to specs
+    this._protocal = protocal || ''; // default value according to specs
     this._readyState = CONNECTING;
     if (instance) {
       instance.dispatchEvent({
@@ -93,6 +93,7 @@ class WebSocket extends EventTarget(EVENTS) {
     
     wx.connectSocket({
       url,
+      protocals: this._protocal,
       fail: (error) => setTimeout(() => errorHandler(error), 0),
     });
   }
@@ -119,8 +120,8 @@ class WebSocket extends EventTarget(EVENTS) {
       throw new Error('INVALID_STATE_ERR');
     }
 
-    if (typeof data !== 'string') {
-      throw new TypeError('only string typed data are supported');
+    if (!(typeof data === 'string' || data instanceof ArrayBuffer)) {
+      throw new TypeError('only String/ArrayBuffer supported');
     }
 
     wx.sendSocketMessage({
