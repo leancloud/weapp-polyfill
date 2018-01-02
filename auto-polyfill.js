@@ -1,7 +1,11 @@
 var polyfill = require('./index.js').polyfill;
-window = window || {};
-polyfill();
-polyfill(window);
+try {
+  polyfill();
+} catch (e) {}
+try{
+  window = window || {};
+  polyfill(window);
+} catch (e) {}
 try {
   localStorage = localStorage || require('./localstorage.js');
 } catch (e) {}
