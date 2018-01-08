@@ -22,6 +22,8 @@ module.exports = {
       if (!target[k]) target[k] = polyfills[k];
     }
     OnlineOfflineEvents.polyfill(target);
+    //  假扮为 React Native，让 axios 认为这是一个 nonStandardBrowserEnv
+    target.navigator.product = 'ReactNative';
   },
   localStorage,
   XMLHttpRequest,
