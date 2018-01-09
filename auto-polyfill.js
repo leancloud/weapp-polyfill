@@ -2,8 +2,10 @@ var polyfill = require('./index.js').polyfill;
 try {
   polyfill();
 } catch (e) {}
+try {
+  polyfill(GameGlobal);
+} catch (e) {}
 try{
-  window = window || {};
   polyfill(window);
 } catch (e) {}
 try {
