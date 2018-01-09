@@ -51,6 +51,9 @@ const {
 - 仅当使用 auto polyfill 功能时有效。当网络状态变化时，会在当前模块的 global/window 中派发 online/offline 事件。
 
 ## Changelogs
+#### 3.1.1
+- 修复 auto-polyfill 在小游戏真机上没有生效的问题
+
 ### 3.1.0
 -  支持微信小游戏
 

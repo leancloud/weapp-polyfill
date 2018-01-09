@@ -1,6 +1,6 @@
 {
   "name": "weapp-polyfill",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "description": "Browser API polyfill for Weapp",
   "main": "index.js",
   "scripts": {
