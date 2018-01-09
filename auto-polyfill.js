@@ -6,6 +6,7 @@ try {
   polyfill(GameGlobal);
 } catch (e) {}
 try{
+  window = window || {};
   polyfill(window);
 } catch (e) {}
 try {
