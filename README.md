@@ -51,6 +51,11 @@ const {
 - 仅当使用 auto polyfill 功能时有效。当网络状态变化时，会在当前模块的 global/window 中派发 online/offline 事件。
 
 ## Changelogs
+#### 3.1.2
+- 修复了导致 Babel 提供的 Promise 失效的兼容性问题
+- 修复了 `WebSocket is not connected` 错误
+- 修复小程序中一个 regression
+
 #### 3.1.1
 - 修复 auto-polyfill 在小游戏真机上没有生效的问题
 
