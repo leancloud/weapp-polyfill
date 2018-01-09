@@ -109,6 +109,7 @@ class WebSocket extends EventTarget(EVENTS) {
   }
 
   close() {
+    if (this.readyState === CLOSED) return;
     if (this.readyState === CONNECTING) {
       console.warn('close WebSocket which is connecting might not work');
     }
