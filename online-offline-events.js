@@ -9,6 +9,11 @@ exports.polyfill = target => {
     target.addEventListener = internalEventTarget.addEventListener.bind(internalEventTarget);
     target.removeEventListener = internalEventTarget.removeEventListener.bind(internalEventTarget);
     target.dispatchEvent = internalEventTarget.dispatchEvent.bind(internalEventTarget);
+    // avoid this condition to be true:
+    // https://github.com/zloirock/core-js/blob/9f051803760c02b306aae2595621bb7ef698fc29/library/modules/_task.js#L61
+    if (typeof postMessage == 'function' && !target.importScripts) {
+      target.importScripts = () => { throw new Error('mocked'); };
+    }
   }
   wx.getNetworkType({
     success: ({networkType}) => {
