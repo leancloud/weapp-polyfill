@@ -32,7 +32,7 @@ const {
   WebSocket,
   localStorage,
   polyfill,
-} = requrie('weapp-polyfill');
+} = require('weapp-polyfill');
 ```
 
 不支持不使用打包工具直接在微信开发工具使用。
