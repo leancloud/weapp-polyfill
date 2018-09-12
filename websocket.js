@@ -13,21 +13,6 @@ const EVENTS = [
   'close',
 ];
 
-let instance;
-
-function errorHandler(event) {
-  // 安卓小程序会诡异地触发 onSocketError 回调
-  // 通过比较 message 过滤掉
-  if (event.message === "") return;
-  if (instance) {
-    instance._readyState = CLOSED;
-    instance.dispatchEvent({
-      type: 'error',
-      message: event.errMsg,
-    });
-  }
-}
-
 class WebSocket extends EventTarget(EVENTS) {
   constructor(url, protocal) {
     if (!url) {
@@ -40,61 +25,57 @@ class WebSocket extends EventTarget(EVENTS) {
     this._url = url;
     this._protocal = protocal || ''; // default value according to specs
     this._readyState = CONNECTING;
-    if (instance) {
-      instance.dispatchEvent({
-        type: 'close'
+
+    const errorHandler = (event) => {
+      this._readyState = CLOSED;
+      this.dispatchEvent({
+        type: 'error',
+        message: event.errMsg,
       });
     }
-    instance = this;
     
-    wx.onSocketOpen(function (event) {
-      if (instance) {
-        instance._readyState = OPEN;
-        instance.dispatchEvent({
-          type: 'open'
-        });
-      }
-    });
-    wx.onSocketError(errorHandler);
-    wx.onSocketMessage(function (event) {
-      if (instance) {
-        var {
-          data,
-          origin,
-          ports,
-          source,
-        } = event;
-        instance.dispatchEvent({
-          data,
-          origin,
-          ports,
-          source,
-          type: 'message',
-        });
-      }
-    });
-    wx.onSocketClose(function (event) {
-      if (instance) {
-        instance._readyState = CLOSED;
-        var {
-          code,
-          reason,
-          wasClean,
-        } = event;
-        instance.dispatchEvent({
-          code,
-          reason,
-          wasClean,
-          type: 'close',
-        });
-        instance = null;
-      }
-    });
-    
-    wx.connectSocket({
+    const socketTask = wx.connectSocket({
       url,
       protocals: this._protocal,
       fail: (error) => setTimeout(() => errorHandler(error), 0),
+    });
+    this._socketTask = socketTask;
+
+    socketTask.onOpen((event) => {
+      this._readyState = OPEN;
+      this.dispatchEvent({
+        type: 'open'
+      });
+    });
+    socketTask.onError(errorHandler);
+    socketTask.onMessage((event) => {
+      var {
+        data,
+        origin,
+        ports,
+        source,
+      } = event;
+      this.dispatchEvent({
+        data,
+        origin,
+        ports,
+        source,
+        type: 'message',
+      });
+    });
+    socketTask.onClose((event) => {
+      this._readyState = CLOSED;
+      var {
+        code,
+        reason,
+        wasClean,
+      } = event;
+      this.dispatchEvent({
+        code,
+        reason,
+        wasClean,
+        type: 'close',
+      });
     });
   }
 
@@ -113,7 +94,7 @@ class WebSocket extends EventTarget(EVENTS) {
     if (this.readyState === CONNECTING) {
       console.warn('close WebSocket which is connecting might not work');
     }
-    wx.closeSocket();
+    this._socketTask.close();
   }
 
   send(data) {
@@ -125,7 +106,7 @@ class WebSocket extends EventTarget(EVENTS) {
       throw new TypeError('only String/ArrayBuffer supported');
     }
 
-    wx.sendSocketMessage({
+    this._socketTask.send({
       data
     });
   }
