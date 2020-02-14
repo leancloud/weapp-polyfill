@@ -51,6 +51,10 @@ const {
 - 仅当使用 auto polyfill 功能时有效。当网络状态变化时，会在当前模块的 global/window 中派发 online/offline 事件。
 
 ## Changelogs
+
+#### 3.2.1
+- 修复了 WebSocket protocal 参数不生效的问题
+
 ### 3.2.0
 - WebSocket 支持多实例（需要基础库 >= 1.7.0）
 
