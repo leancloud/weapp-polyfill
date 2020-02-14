@@ -67,7 +67,7 @@ const {
 
 ### 3.0.0
 - WebSocket 增加了以下特性
-  - 支持 subprotocal
+  - 支持 subprotocol
   - 支持二进制帧（ArrayBuffer）
 - 增加 online/offline events 支持
 
