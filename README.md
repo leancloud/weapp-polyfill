@@ -52,8 +52,11 @@ const {
 
 ## Changelogs
 
+#### 3.2.2
+- 修复了 WebSocket protocol 参数为 string 类型时在真机最新基础库上报错的问题
+
 #### 3.2.1
-- 修复了 WebSocket protocal 参数不生效的问题
+- 修复了 WebSocket protocol 参数不生效的问题
 
 ### 3.2.0
 - WebSocket 支持多实例（需要基础库 >= 1.7.0）
