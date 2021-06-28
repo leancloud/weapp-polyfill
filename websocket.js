@@ -23,7 +23,7 @@ class WebSocket extends EventTarget(EVENTS) {
     }
     super();
     this._url = url;
-    this._protocol = protocol || ''; // default value according to specs
+    this._protocol = protocol;
     this._readyState = CONNECTING;
 
     const errorHandler = (event) => {
@@ -36,7 +36,10 @@ class WebSocket extends EventTarget(EVENTS) {
     
     const socketTask = wx.connectSocket({
       url,
-      protocols: this._protocol,
+      protocols:
+        this._protocol === undefined || Array.isArray(this._protocol)
+          ? this._protocol
+          : [this._protocol],
       fail: (error) => setTimeout(() => errorHandler(error), 0),
     });
     this._socketTask = socketTask;
